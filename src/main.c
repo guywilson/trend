@@ -11,29 +11,28 @@
 
 void printUsage(void) {
     printf("Usage:\n");
-    printf("\ttrend -s size[K][M][G] -o outfile inputfile\n\n");
+    printf("\ttrend -s size[K][M][G] file\n\n");
 }
 
 int main(int argc, char ** argv) {
     int             i;
     int             fdi;
     int             fdo;
+    int             rtn;
     off_t           newLength;
     size_t          multiplier;
     char *          pszSizeArg;
-    char *          pszOutputFile;
     char *          pszFilename;
+    char            szTempfile[16];
     uint8_t         buffer[READ_BUFFER_SIZE];
     ssize_t         bytesRead;
+    ssize_t         bytesWritten;
 
 	if (argc >= 4) {
 		for (i = 1;i < argc - 1;i++) {
 			if (argv[i][0] == '-') {
 				if (argv[i][1] == 's') {
 					pszSizeArg = strdup(&argv[++i][0]);
-				}
-				else if (argv[i][1] == 'o') {
-					pszOutputFile = strdup(&argv[++i][0]);
 				}
 				else {
 					fprintf(stderr, "Unknown argument '%s'", &argv[i][0]);
@@ -81,16 +80,31 @@ int main(int argc, char ** argv) {
 
     lseek(fdi, newLength, SEEK_END);
 
-    fdo = open(pszOutputFile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    strncpy(szTempfile, "trendAZ_XXXXXX", 14);
+
+    fdo = mkstemp(szTempfile);
 
     if (fdo < 0) {
-        fprintf(stderr, "ERROR: Failed to open file %s:%s\n", pszOutputFile, strerror(errno));
+        fprintf(stderr, "ERROR: Failed to open file %s:%s\n", szTempfile, strerror(errno));
         exit(-1);
     }
 
     do {
         bytesRead = read(fdi, buffer, READ_BUFFER_SIZE);
-        write(fdo, buffer, bytesRead);
+        bytesWritten = write(fdo, buffer, bytesRead);
+
+        if (bytesWritten < bytesRead) {
+            fprintf(
+                    stderr, 
+                    "ERROR: failed to write sufficient bytes to file %s:%s\n", 
+                    szTempfile, 
+                    strerror(errno));
+
+            close(fdi);
+            close(fdo);
+
+            exit(-1);
+        }
     }
     while (bytesRead > 0);
 
@@ -100,6 +114,20 @@ int main(int argc, char ** argv) {
 
     close(fdi);
     close(fdo);
+
+    rtn = unlink(pszFilename);
+
+    if (rtn < 0) {
+        fprintf(stderr, "ERROR: Failed to unlink file %s:%s\n", pszFilename, strerror(errno));
+        exit(-1);
+    }
+
+    rtn = rename(szTempfile, pszFilename);
+
+    if (rtn < 0) {
+        fprintf(stderr, "ERROR: Failed to rename file %s:%s\n", szTempfile, strerror(errno));
+        exit(-1);
+    }
 
     return 0;
 }
