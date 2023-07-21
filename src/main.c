@@ -11,7 +11,7 @@
 
 void printUsage(void) {
     printf("Usage:\n");
-    printf("\ttrend -s size[K][M][G] file\n\n");
+    printf("\ttrend -s size[K][M][G] -o outfile inputfile\n\n");
 }
 
 int main(int argc, char ** argv) {
@@ -36,7 +36,7 @@ int main(int argc, char ** argv) {
 					pszOutputFile = strdup(&argv[++i][0]);
 				}
 				else {
-					printf("Unknown argument '%s'", &argv[i][0]);
+					fprintf(stderr, "Unknown argument '%s'", &argv[i][0]);
 					printUsage();
 					return 0;
 				}
@@ -69,7 +69,6 @@ int main(int argc, char ** argv) {
                 break;
         }
 
-        printf("Multiplier = %ld\n", multiplier);
         pszSizeArg[strlen(pszSizeArg) - 1] = 0;
     }
     else {
@@ -78,8 +77,6 @@ int main(int argc, char ** argv) {
 
     newLength = -strtoll(pszSizeArg, NULL, 10) * multiplier;
 
-    printf("New file length = %lld\n", newLength);
-
     fdi = open(pszFilename, O_RDONLY);
 
     lseek(fdi, newLength, SEEK_END);
@@ -87,7 +84,7 @@ int main(int argc, char ** argv) {
     fdo = open(pszOutputFile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
     if (fdo < 0) {
-        printf("ERROR: Failed to open file %s:%s\n", pszOutputFile, strerror(errno));
+        fprintf(stderr, "ERROR: Failed to open file %s:%s\n", pszOutputFile, strerror(errno));
         exit(-1);
     }
 
@@ -98,7 +95,7 @@ int main(int argc, char ** argv) {
     while (bytesRead > 0);
 
     if (bytesRead < 0) {
-        printf("ERROR: Failed to read file %s:%s\n", pszFilename, strerror(errno));
+        fprintf(stderr, "ERROR: Failed to read file %s:%s\n", pszFilename, strerror(errno));
     }
 
     close(fdi);
