@@ -26,7 +26,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define READ_BUFFER_SIZE                    64
 
+const char * pszWarranty = 
+    "trend  Copyright (C) 2023  Guy Wilson" \
+    "This program comes with ABSOLUTELY NO WARRANTY." \
+    "This is free software, and you are welcome to redistribute it" \
+    "under certain conditions.\n\n";
+
 void printUsage(void) {
+    printf("%s", pszWarranty);
     printf("Usage:\n");
     printf("\ttrend -s size[K][M][G] file\n\n");
 }
