@@ -28,7 +28,7 @@ int main(int argc, char ** argv) {
     ssize_t         bytesRead;
     ssize_t         bytesWritten;
 
-	if (argc >= 4) {
+	if (argc == 4) {
 		for (i = 1;i < argc - 1;i++) {
 			if (argv[i][0] == '-') {
 				if (argv[i][1] == 's') {
@@ -80,7 +80,7 @@ int main(int argc, char ** argv) {
 
     lseek(fdi, newLength, SEEK_END);
 
-    strncpy(szTempfile, "trendAZ_XXXXXX", 14);
+    strncpy(szTempfile, "trendAZ_XXXXXX", 16);
 
     fdo = mkstemp(szTempfile);
 
