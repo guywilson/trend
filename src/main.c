@@ -27,9 +27,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define READ_BUFFER_SIZE                    64
 
 const char * pszWarranty = 
-    "trend  Copyright (C) 2023  Guy Wilson" \
-    "This program comes with ABSOLUTELY NO WARRANTY." \
-    "This is free software, and you are welcome to redistribute it" \
+    "TREND (TRuncate END)\n\n" \
+    "Copyright (C) 2023  Guy Wilson\n" \
+    "This program comes with ABSOLUTELY NO WARRANTY.\n" \
+    "This is free software, and you are welcome to redistribute it\n" \
     "under certain conditions.\n\n";
 
 void printUsage(void) {
