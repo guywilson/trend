@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #define READ_BUFFER_SIZE                    64
 
@@ -52,6 +53,7 @@ int main(int argc, char ** argv) {
     uint8_t         buffer[READ_BUFFER_SIZE];
     ssize_t         bytesRead;
     ssize_t         bytesWritten;
+    struct stat     stats;
 
 	if (argc == 4) {
 		for (i = 1;i < argc - 1;i++) {
@@ -103,6 +105,19 @@ int main(int argc, char ** argv) {
 
     fdi = open(pszFilename, O_RDONLY);
 
+    if (fdi < 0) {
+        fprintf(stderr, "ERROR: Failed to open file %s:%s\n", pszFilename, strerror(errno));
+        exit(-1);
+    }
+
+    rtn = fstat(fdi, &stats);
+
+    if (rtn < 0) {
+        fprintf(stderr, "ERROR: Failed to get file stats for %s:%s\n", pszFilename, strerror(errno));
+        close(fdi);
+        exit(-1);
+    }
+
     lseek(fdi, newLength, SEEK_END);
 
     strncpy(szTempfile, "trendAZ_XXXXXX", 16);
@@ -151,6 +166,13 @@ int main(int argc, char ** argv) {
 
     if (rtn < 0) {
         fprintf(stderr, "ERROR: Failed to rename file %s:%s\n", szTempfile, strerror(errno));
+        exit(-1);
+    }
+
+    rtn = chmod(pszFilename, stats.st_mode);
+
+    if (rtn < 0) {
+        fprintf(stderr, "ERROR: Failed to update file mode %s:%s\n", pszFilename, strerror(errno));
         exit(-1);
     }
 
